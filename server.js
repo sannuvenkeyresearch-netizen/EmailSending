@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+
 const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
@@ -10,27 +13,36 @@ app.use(cors());
 app.use(express.json());
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
-    }
+    },
+    family: 4
 });
 
+// Health Check API
 app.get("/", (req, res) => {
     res.send("Email API is Running Successfully");
 });
 
+// Email API
 app.post("/send-email", async (req, res) => {
 
     console.log("========== API HIT ==========");
     console.log(req.body);
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
 
     try {
 
         const { to, subject, message } = req.body;
 
+        // Verify SMTP connection
+        await transporter.verify();
+        console.log("SMTP Connected Successfully");
+
+        // Send Email
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to,
@@ -38,7 +50,7 @@ app.post("/send-email", async (req, res) => {
             html: `<p>${message}</p>`
         });
 
-        console.log("MAIL SENT");
+        console.log("MAIL SENT SUCCESSFULLY");
 
         return res.status(200).json({
             success: true,
