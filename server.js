@@ -12,6 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Brevo SMTP Transporter
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
     port: 587,
@@ -27,22 +28,27 @@ app.get("/", (req, res) => {
     res.send("Email API is Running Successfully");
 });
 
-app.post("/send-email", async (req, res) => {
+// Environment Check API
+app.get("/env-check", (req, res) => {
+    res.json({
+        brevoUserExists: !!process.env.BREVO_USER,
+        brevoPasswordExists: !!process.env.BREVO_PASSWORD
+    });
+});
 
+// Send Email API
+app.post("/send-email", async (req, res) => {
     console.log("========== API HIT ==========");
     console.log(req.body);
 
     try {
-
         const { to, subject, message } = req.body;
 
-        // Verify SMTP connection
         await transporter.verify();
         console.log("SMTP Connected Successfully");
 
-        // Send Email
         await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: process.env.BREVO_USER,
             to,
             subject,
             html: `<p>${message}</p>`
@@ -56,7 +62,6 @@ app.post("/send-email", async (req, res) => {
         });
 
     } catch (error) {
-
         console.log("MAIL ERROR");
         console.log(error);
 
@@ -67,8 +72,6 @@ app.post("/send-email", async (req, res) => {
     }
 });
 
-
-});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
