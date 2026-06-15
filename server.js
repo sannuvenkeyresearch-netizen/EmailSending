@@ -22,13 +22,11 @@ app.get("/", (req, res) => {
 });
 
 app.post("/send-email", async (req, res) => {
-    try {
+    console.log("API HIT");
+    console.log(req.body);
 
-        const {
-            to,
-            subject,
-            message
-        } = req.body;
+    try {
+        const { to, subject, message } = req.body;
 
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
@@ -41,10 +39,8 @@ app.post("/send-email", async (req, res) => {
             success: true,
             message: "Email sent successfully"
         });
-
     } catch (error) {
-
-        console.log(error);
+        console.log("ERROR:", error);
 
         return res.status(500).json({
             success: false,
