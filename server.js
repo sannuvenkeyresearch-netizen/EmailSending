@@ -14,14 +14,14 @@ app.use(express.json());
 
 // Brevo SMTP Transporter
 const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
+    host: "smtp.gmail.com",
     port: 587,
     secure: false,
     auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASSWORD
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
     }
-});
+})
 
 // Health Check API
 app.get("/", (req, res) => {
